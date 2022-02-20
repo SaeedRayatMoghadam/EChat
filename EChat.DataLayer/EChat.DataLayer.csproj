@@ -6,7 +6,10 @@
 
   <ItemGroup>
     <Folder Include="Context\" />
-    <Folder Include="Entities\" />
+    <Folder Include="Entities\Chats\" />
+    <Folder Include="Entities\Roles\" />
+    <Folder Include="Entities\Users\" />
+    <Folder Include="Enums\" />
   </ItemGroup>
 
 </Project>
