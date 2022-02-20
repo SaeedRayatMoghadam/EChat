@@ -3,7 +3,31 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EChat.Web", "EChat.Web\EChat.Web.csproj", "{23FA6A6A-AD20-4245-825E-9A0869FBC061}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EChat.CoreLayer", "EChat.CoreLayer\EChat.CoreLayer.csproj", "{A7AD7595-4EFF-46AF-AD3E-6F6EBE299FA6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EChat.DataLayer", "EChat.DataLayer\EChat.DataLayer.csproj", "{2C9C709A-EEE6-478C-9073-35079992B9A8}"
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{23FA6A6A-AD20-4245-825E-9A0869FBC061}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23FA6A6A-AD20-4245-825E-9A0869FBC061}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23FA6A6A-AD20-4245-825E-9A0869FBC061}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23FA6A6A-AD20-4245-825E-9A0869FBC061}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7AD7595-4EFF-46AF-AD3E-6F6EBE299FA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7AD7595-4EFF-46AF-AD3E-6F6EBE299FA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7AD7595-4EFF-46AF-AD3E-6F6EBE299FA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7AD7595-4EFF-46AF-AD3E-6F6EBE299FA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C9C709A-EEE6-478C-9073-35079992B9A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C9C709A-EEE6-478C-9073-35079992B9A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C9C709A-EEE6-478C-9073-35079992B9A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C9C709A-EEE6-478C-9073-35079992B9A8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
