@@ -5,8 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Services\" />
+    <Folder Include="Services\Chats\" />
+    <Folder Include="Services\Roles\" />
     <Folder Include="Utilities\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EChat.DataLayer\EChat.DataLayer.csproj" />
   </ItemGroup>
 
 </Project>

@@ -9,6 +9,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using EChat.CoreLayer.Services.Chats;
+using EChat.CoreLayer.Services.Roles;
+using EChat.CoreLayer.Services.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace EChat.Web
@@ -27,10 +30,16 @@ namespace EChat.Web
         {
             services.AddControllersWithViews();
 
+            //Database
             services.AddDbContext<EChatContext>(option =>
             {
                 option.UseSqlServer(Configuration.GetConnectionString("Default"));
             });
+
+            //IOC
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IRoleService, RoleService>();
+            services.AddScoped<IChatService, ChatService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

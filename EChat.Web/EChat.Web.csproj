@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\EChat.CoreLayer\EChat.CoreLayer.csproj" />
     <ProjectReference Include="..\EChat.DataLayer\EChat.DataLayer.csproj" />
   </ItemGroup>
 
