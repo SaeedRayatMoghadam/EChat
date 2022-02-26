@@ -1,0 +1,17 @@
+﻿@model EChat.CoreLayer.ViewModels.LoginViewModel
+<form asp-controller="Auth" asp-action="Login">
+    <h1 class="text-center">Login</h1>
+
+    @*<div class="text-danger" asp-validation-summary="All"></div>*@
+
+    <label asp-for="UserName"></label>
+    <input asp-for="UserName" type="text" class="form-control" />
+    <span asp-validation-for="UserName" class="text-danger"></span>
+
+    <label asp-for="Password"></label>
+    <input asp-for="Password" type="password" class="form-control" />
+    <span asp-validation-for="Password" class="text-danger"></span>
+
+    <button type="submit" class="btn btn-success mt-4 float-end btn-block" style="margin-right: 8px;">Login</button>
+    <a href="#register" id="register-btn" class="btn btn-primary mt-4">Register</a>
+</form>

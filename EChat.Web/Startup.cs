@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 using EChat.CoreLayer.Services.Chats;
 using EChat.CoreLayer.Services.Roles;
 using EChat.CoreLayer.Services.Users;
+using EChat.Web.Hubs;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 namespace EChat.Web
@@ -40,6 +42,22 @@ namespace EChat.Web
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IChatService, ChatService>();
+
+            //Authentication
+            services.AddAuthentication(option =>
+            {
+                option.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                option.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                option.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            }).AddCookie(option =>
+            {
+                option.LoginPath = "/Auth";
+                option.LogoutPath = "/Augh/Logout";
+                option.ExpireTimeSpan = TimeSpan.FromDays(30);
+            });
+
+            //SignalR
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -60,6 +78,7 @@ namespace EChat.Web
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -67,6 +86,7 @@ namespace EChat.Web
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapHub<ChatHub>("/chat");
             });
         }
     }

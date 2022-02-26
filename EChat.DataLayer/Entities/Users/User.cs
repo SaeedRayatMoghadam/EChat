@@ -11,7 +11,7 @@ namespace EChat.DataLayer.Entities.Users
         public string UserName { get; set; }
 
         [MinLength(6)]
-        [MaxLength(30)]
+        [MaxLength(50)]
         public string Password { get; set; }
 
         [MaxLength(60)]

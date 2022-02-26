@@ -2,7 +2,149 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="row">
+    <div class="col-8 chat-content">
+        <div class="header">
+            <img src="img/Default.jpg" />
+            <h2>Saeed</h2>
+        </div>
+        <div class="chats">
+            <div class="chat-me">
+                <div class="chat">
+                    <p>Hey ... </p>
+                    <span>2020/06/05</span>
+                </div>
+            </div>
+            <div class="chat-you">
+                <div class="chat">
+                    <p>Hi , How are you doing ?</p>
+                    <span>2020/06/05</span>
+                </div>
+            </div>
+            <div class="chat-me">
+                <div class="chat">
+                    <p>I`m Perfect , Whats up ?</p>
+                    <span>2020/06/05</span>
+                </div>
+            </div>
+            <div class="chat-you">
+                <div class="chat">
+                    <p>Everything is Great !</p>
+                    <span>2020/06/05</span>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            <form>
+                <input type="text" class="form-control" placeholder="Please Enter your text">
+                <button class="btn btn-success" style="background-color: #007bff">
+                    Send
+                    <i class="fa fa-send"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="col-4 rooms">
+        <Ul>
+            <li>
+                <form>
+                    <input type="text" placeholder="Search ..." class="form-control" style="padding-left: 2rem" />
+                    <i class="fa fas fa-search"></i>
+                </form>
+            </li>
+            <li>
+                Global
+                <img src="img/Default.jpg" />
+                <span>17:20 2/26/2022 </span>
+            </li>
+            <li class="active">
+                Saeed
+                <img src="img/Default.jpg" />
+                <span>17:20 2/26/2022 </span>
+
+            </li>
+            <li>
+                Brian
+                <img src="img/Default.jpg" />
+                <span>17:20 2/26/2022 </span>
+            </li>
+            <li>
+                Global
+                <img src="img/Default.jpg" />
+                <span>17:20 2/26/2022 </span>
+            </li>
+            <li>
+                Saeed
+                <img src="img/Default.jpg" />
+                <span>17:20 2/26/2022 </span>
+
+            </li>
+            <li>
+                Brian
+                <img src="img/Default.jpg" />
+                <span>17:20 2/26/2022 </span>
+            </li>
+            <li>
+                Global
+                <img src="img/Default.jpg" />
+                <span>17:20 2/26/2022 </span>
+            </li>
+            <li>
+                Saeed
+                <img src="img/Default.jpg" />
+                <span>17:20 2/26/2022 </span>
+
+            </li>
+            <li>
+                Brian
+                <img src="img/Default.jpg" />
+                <span>17:20 2/26/2022 </span>
+            </li>
+            <li>
+                Global
+                <img src="img/Default.jpg" />
+                <span>17:20 2/26/2022 </span>
+            </li>
+            <li>
+                Saeed
+                <img src="img/Default.jpg" />
+                <span>17:20 2/26/2022 </span>
+
+            </li>
+            <li>
+                Brian
+                <img src="img/Default.jpg" />
+                <span>17:20 2/26/2022 </span>
+            </li>
+            <li>
+                Global
+                <img src="img/Default.jpg" />
+                <span>17:20 2/26/2022 </span>
+            </li>
+            <li>
+                Saeed
+                <img src="img/Default.jpg" />
+                <span>17:20 2/26/2022 </span>
+
+            </li>
+            <li>
+                Brian
+                <img src="img/Default.jpg" />
+                <span>17:20 2/26/2022 </span>
+            </li>
+        </Ul>
+    </div>
 </div>
+
+@section Scripts
+{
+    <script src="lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+    <script>
+        var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
+        connection.on("welcome",
+            function(message) {
+                console.log(message);
+            });
+        connection.start();
+    </script>
+}

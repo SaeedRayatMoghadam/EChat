@@ -1,0 +1,12 @@
+﻿@using EChat.CoreLayer.ViewModels
+
+<div id="login" class="auth">
+    <partial name="Auth/_Login" model="new LoginViewModel()" />
+</div>
+<div id="register" class="auth" style="display: none;">
+    <partial name="Auth/_Register" model="new RegisterViewModel()" />
+</div>
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial"/>
+}
