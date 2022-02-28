@@ -14,6 +14,9 @@ namespace EChat.DataLayer.Entities.Chats
         [MaxLength(110)]
         public string Token { get; set; }
 
+        [MaxLength(100)]
+        public string ImageUrl { get; set; }
+
         public long OwnerId { get; set; }
 
         #region Relations
@@ -22,6 +25,8 @@ namespace EChat.DataLayer.Entities.Chats
         public User User { get; set; }
 
         public ICollection<Chat> Chats { get; set; }
+        public ICollection<UserGroup> UserGroups { get; set; }
+
 
         #endregion
     }

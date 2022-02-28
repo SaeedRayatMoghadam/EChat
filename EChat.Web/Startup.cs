@@ -13,6 +13,7 @@ using EChat.CoreLayer.Services.Chats;
 using EChat.CoreLayer.Services.Chats.ChatGroups;
 using EChat.CoreLayer.Services.Roles;
 using EChat.CoreLayer.Services.Users;
+using EChat.CoreLayer.Services.Users.UserGroups;
 using EChat.Web.Hubs;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
@@ -40,10 +41,13 @@ namespace EChat.Web
             });
 
             //IOC
-            services.AddScoped<IUserService, UserService>();
             services.AddScoped<IRoleService, RoleService>();
+
             services.AddScoped<IChatService, ChatService>();
             services.AddScoped<IChatGroupService, ChatGroupService>();
+
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IUserGroupService, UserGroupService>();
 
             //Authentication
             services.AddAuthentication(option =>

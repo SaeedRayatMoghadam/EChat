@@ -5,9 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Services\Users\UserGroups\" />
     <Folder Include="Utilities\Security\" />
-    <Folder Include="ViewModels\" />
     <Folder Include="Services\Roles\" />
+    <Folder Include="ViewModels\Chats\" />
   </ItemGroup>
 
   <ItemGroup>

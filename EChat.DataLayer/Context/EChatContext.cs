@@ -21,6 +21,7 @@ namespace EChat.DataLayer.Context
         public DbSet<Role> Roles { get; set; }
         public DbSet<RolePermissions> RolePermissions { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
+        public DbSet<UserGroup> UserGroups { get; set; }
 
         #endregion
 
@@ -38,6 +39,12 @@ namespace EChat.DataLayer.Context
             modelBuilder.Entity<Chat>()
                 .HasOne(c => c.User)
                 .WithMany(c => c.Chats)
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<UserGroup>()
+                .HasOne(c => c.User)
+                .WithMany(c => c.UserGroups)
                 .HasForeignKey(c => c.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 

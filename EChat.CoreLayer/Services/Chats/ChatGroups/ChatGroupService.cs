@@ -2,16 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using EChat.CoreLayer.Services.Users.UserGroups;
 using EChat.DataLayer.Context;
 using EChat.DataLayer.Entities.Chats;
+using EChat.DataLayer.Entities.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace EChat.CoreLayer.Services.Chats.ChatGroups
 {
     public class ChatGroupService : BaseService,IChatGroupService
     {
-        public ChatGroupService(EChatContext context) : base(context)
+        private readonly IUserGroupService _userGroupService;
+        public ChatGroupService(EChatContext context, IUserGroupService userGroupService) : base(context)
         {
+            _userGroupService = userGroupService;
         }
 
         public async Task<List<ChatGroup>> GetAll(long userId)
@@ -36,6 +40,13 @@ namespace EChat.CoreLayer.Services.Chats.ChatGroups
             Insert(chatGroup);
 
             await Save();
+
+            await _userGroupService.JoinGroup(new UserGroup()
+            {
+                CreateDate = DateTime.Now,
+                GroupId = chatGroup.Id,
+                UserId = userId
+            });
 
             return chatGroup;
         }
