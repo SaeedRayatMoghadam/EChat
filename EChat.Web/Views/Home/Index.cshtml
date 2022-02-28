@@ -1,9 +1,39 @@
-﻿@{
+﻿@model List<EChat.DataLayer.Entities.Chats.ChatGroup>
+@{
     ViewData["Title"] = "Home Page";
 }
 
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form class="modal-content" onsubmit="createChatGroup(event)">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">New Chat</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input class="form-control" id="groupName" placeholder="Enter chat group name" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Add</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+
+
 <div class="row">
+
     <div class="col-8 chat-content">
+
         <div class="header">
             <img src="img/Default.jpg" />
             <h2>Saeed</h2>
@@ -34,17 +64,22 @@
                 </div>
             </div>
         </div>
+
         <div class="footer">
-            <form>
-                <input type="text" class="form-control" placeholder="Please Enter your text">
+            <form onsubmit="sendPm(event)">
+                <input id="pm" type="text" class="form-control" placeholder="Please Enter your text">
                 <button class="btn btn-success" style="background-color: #007bff">
                     Send
                     <i class="fa fa-send"></i>
                 </button>
             </form>
         </div>
+
     </div>
+
+
     <div class="col-4 rooms">
+
         <Ul>
             <li>
                 <form>
@@ -53,98 +88,76 @@
                 </form>
             </li>
             <li>
-                Global
-                <img src="img/Default.jpg" />
-                <span>17:20 2/26/2022 </span>
+                <button class="btn btn-primary btn-block text-center w-100" type="button" data-toggle="modal" data-target="#exampleModal">
+                    New Chat
+                    <i class="fa fa-plus"></i>
+                </button>
             </li>
-            <li class="active">
-                Saeed
-                <img src="img/Default.jpg" />
-                <span>17:20 2/26/2022 </span>
 
-            </li>
-            <li>
-                Brian
-                <img src="img/Default.jpg" />
-                <span>17:20 2/26/2022 </span>
-            </li>
-            <li>
-                Global
-                <img src="img/Default.jpg" />
-                <span>17:20 2/26/2022 </span>
-            </li>
-            <li>
-                Saeed
-                <img src="img/Default.jpg" />
-                <span>17:20 2/26/2022 </span>
+            @foreach (var item in Model)
+            {
+                <li data-id="@item.Token">
+                    @item.Title
+                    <img src="/img/Default.jpg" />
+                    <span>@item.Chats.LastOrDefault()?.CreateDate</span>
+                </li>
+            }
 
-            </li>
-            <li>
-                Brian
-                <img src="img/Default.jpg" />
-                <span>17:20 2/26/2022 </span>
-            </li>
-            <li>
-                Global
-                <img src="img/Default.jpg" />
-                <span>17:20 2/26/2022 </span>
-            </li>
-            <li>
-                Saeed
-                <img src="img/Default.jpg" />
-                <span>17:20 2/26/2022 </span>
-
-            </li>
-            <li>
-                Brian
-                <img src="img/Default.jpg" />
-                <span>17:20 2/26/2022 </span>
-            </li>
-            <li>
-                Global
-                <img src="img/Default.jpg" />
-                <span>17:20 2/26/2022 </span>
-            </li>
-            <li>
-                Saeed
-                <img src="img/Default.jpg" />
-                <span>17:20 2/26/2022 </span>
-
-            </li>
-            <li>
-                Brian
-                <img src="img/Default.jpg" />
-                <span>17:20 2/26/2022 </span>
-            </li>
-            <li>
-                Global
-                <img src="img/Default.jpg" />
-                <span>17:20 2/26/2022 </span>
-            </li>
-            <li>
-                Saeed
-                <img src="img/Default.jpg" />
-                <span>17:20 2/26/2022 </span>
-
-            </li>
-            <li>
-                Brian
-                <img src="img/Default.jpg" />
-                <span>17:20 2/26/2022 </span>
-            </li>
         </Ul>
+
     </div>
+
 </div>
 
 @section Scripts
 {
-    <script src="lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
-    <script>
-        var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
-        connection.on("welcome",
-            function(message) {
-                console.log(message);
-            });
-        connection.start();
-    </script>
+<script src="lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+<script>
+    var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
+    connection.on("welcome",
+        function(message) {
+            console.log(message);
+        });
+
+    connection.on("SendMessage",
+        (message) => {
+            console.log(message);
+        });
+
+    connection.on("NewGroup",
+        (groupName, token) => {
+            if (groupName == "Error")
+                alert("an Error has occurred");
+            else {
+
+            $(".rooms ul").append(`
+            <li data-id='${token}'>
+                ${groupName}
+                <img src='/img/default.jpg' />
+                <span></span>
+            </li>
+    `);
+            $("#exampleModal").modal("toggle");
+            }
+        });
+
+    connection.start();
+
+    function sendPm(event) {
+        console.log("send");
+        event.preventDefault();
+
+        var pm = $("#pm").val();
+        connection.invoke("SendMessage", pm);
+    }
+
+    function createChatGroup(event) {
+        event.preventDefault();
+
+        var text = $("#groupName").val();
+        if (text) {
+            connection.invoke("CreateGroup", text);
+        }
+    }
+</script>
 }

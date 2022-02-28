@@ -48,7 +48,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Hubs\" />
+    <Folder Include="Hubs\Interfaces\" />
   </ItemGroup>
 
 </Project>

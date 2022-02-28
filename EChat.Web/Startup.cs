@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using EChat.CoreLayer.Services.Chats;
+using EChat.CoreLayer.Services.Chats.ChatGroups;
 using EChat.CoreLayer.Services.Roles;
 using EChat.CoreLayer.Services.Users;
 using EChat.Web.Hubs;
@@ -42,6 +43,7 @@ namespace EChat.Web
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IChatService, ChatService>();
+            services.AddScoped<IChatGroupService, ChatGroupService>();
 
             //Authentication
             services.AddAuthentication(option =>
