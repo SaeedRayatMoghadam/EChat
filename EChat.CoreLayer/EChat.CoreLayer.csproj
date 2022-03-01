@@ -12,6 +12,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.14" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\EChat.DataLayer\EChat.DataLayer.csproj" />
   </ItemGroup>
 

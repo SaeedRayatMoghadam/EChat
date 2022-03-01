@@ -8,6 +8,6 @@ namespace EChat.CoreLayer.Services.Users.UserGroups
     public interface IUserGroupService
     {
         Task<List<UserGroupViewModel>> GetAll(long userId);
-        Task JoinGroup(UserGroup model);
+        Task JoinGroup(long userId, long groupId);
     }
 }

@@ -4,6 +4,5 @@ namespace EChat.Web.Hubs.Interfaces
 {
     public interface IChatHub
     {
-        Task CreateGroup(string groupName);
     }
 }

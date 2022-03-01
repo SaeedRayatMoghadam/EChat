@@ -7,38 +7,54 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using EChat.CoreLayer.Services.Chats.ChatGroups;
+using EChat.CoreLayer.Services.Users.UserGroups;
 using EChat.CoreLayer.Utilities;
+using EChat.CoreLayer.ViewModels.Chats;
+using EChat.Web.Hubs;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 
 namespace EChat.Web.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
         private readonly IChatGroupService _chatGroupService;
+        private IHubContext<ChatHub> _chatHub;
+        private readonly IUserGroupService _userGroupService;
 
-        public HomeController(ILogger<HomeController> logger, IChatGroupService chatGroupService)
+        public HomeController(IChatGroupService chatGroupService, IHubContext<ChatHub> chatHub, IUserGroupService userGroupService)
         {
-            _logger = logger;
             _chatGroupService = chatGroupService;
+            _chatHub = chatHub;
+            _userGroupService = userGroupService;
         }
 
         [Authorize]
         public async Task<IActionResult> Index()
         {
-            var model = await _chatGroupService.GetAll(User.GetUserId());
+            var model = await _userGroupService.GetAll(User.GetUserId());
             return View(model);
         }
-
-        public IActionResult Privacy()
+        
+        [Authorize]
+        [HttpPost]
+        public async Task CreateGroup([FromForm]CreateGroupViewModel model)
         {
-            return View();
+            try
+            {
+                model.UserId = User.GetUserId();
+                var result = await _chatGroupService.Create(model);
+                _chatHub.Clients.User(User.GetUserId().ToString()).SendAsync("NewGroup",result.Title, result.Token, result.ImageUrl);
+            }
+            catch
+            {
+                _chatHub.Clients.User(User.GetUserId().ToString()).SendAsync("NewGroup", "ERROR");
+            }
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public async Task<IActionResult> Search(string search)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return new ObjectResult(await _chatGroupService.Search(search));
         }
     }
 }

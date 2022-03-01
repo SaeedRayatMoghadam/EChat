@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using EChat.CoreLayer.Services.Chats.ChatGroups;
 using EChat.CoreLayer.Utilities;
+using EChat.CoreLayer.ViewModels.Chats;
 using EChat.Web.Hubs.Interfaces;
 using Microsoft.AspNetCore.SignalR;
 
@@ -34,17 +35,6 @@ namespace EChat.Web.Hubs
             await Clients.All.SendAsync("SendMessage", $"{user} : {message}");
         }
 
-        public async Task CreateGroup(string groupName)
-        {
-            try
-            {
-                var group = await _chatGroupService.Create(groupName, Context.User.GetUserId());
-                await Clients.Caller.SendAsync("NewGroup", groupName, group.Token);
-            }
-            catch
-            {
-                await Clients.Caller.SendAsync("NewGroup", "Error");
-            }
-        }
+        
     }
 }

@@ -1,4 +1,4 @@
-﻿@model List<EChat.DataLayer.Entities.Chats.ChatGroup>
+﻿@model List<EChat.CoreLayer.ViewModels.Chats.UserGroupViewModel>
 @{
     ViewData["Title"] = "Home Page";
 }
@@ -8,7 +8,7 @@
 <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
-        <form class="modal-content" onsubmit="createChatGroup(event)">
+        <form class="modal-content" onsubmit="createChatGroup(event)" enctype="multipart/form-data">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">New Chat</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -17,6 +17,8 @@
             </div>
             <div class="modal-body">
                 <input class="form-control" id="groupName" placeholder="Enter chat group name" />
+                <br />
+                <input type="file" accept="image/*" name="image" class="form-control mt-2" />
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -83,25 +85,37 @@
         <Ul>
             <li>
                 <form>
-                    <input type="text" placeholder="Search ..." class="form-control" style="padding-left: 2rem" />
+                    <input type="text" id="search-input" onkeyup="search()" placeholder="Search ..." class="form-control" style="padding-left: 2rem" />
                     <i class="fa fas fa-search"></i>
                 </form>
             </li>
-            <li>
-                <button class="btn btn-primary btn-block text-center w-100" type="button" data-toggle="modal" data-target="#exampleModal">
-                    New Chat
-                    <i class="fa fa-plus"></i>
-                </button>
+
+            <li id="search-result" style="display: none">
+                <ul>
+                    <li class="alert alert-warning">Not Found</li>
+                </ul>
             </li>
 
-            @foreach (var item in Model)
-            {
-                <li data-id="@item.Token">
-                    @item.Title
-                    <img src="/img/Default.jpg" />
-                    <span>@item.Chats.LastOrDefault()?.CreateDate</span>
-                </li>
-            }
+            <li id="user-groups">
+                <ul>
+                    <li>
+                        <button class="btn btn-primary btn-block text-center w-100" type="button" data-toggle="modal" data-target="#exampleModal">
+                            New Chat
+                            <i class="fa fa-plus"></i>
+                        </button>
+                    </li>
+
+                    @foreach (var item in Model)
+                    {
+                        <li data-id="@item.Token">
+                            @item.GroupName
+                            <img src="/images/groups/@item.ImageUrl" />
+                            <span>@item.LastChat?.CreateDate</span>
+                        </li>
+                    }
+                </ul>
+            </li>
+
 
         </Ul>
 
@@ -113,51 +127,104 @@
 {
 <script src="lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
 <script>
-    var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
-    connection.on("welcome",
-        function(message) {
-            console.log(message);
-        });
+        var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
+        connection.on("welcome",
+            function(message) {
+                console.log(message);
+            });
 
-    connection.on("SendMessage",
-        (message) => {
-            console.log(message);
-        });
+        connection.on("SendMessage",
+            (message) => {
+                console.log(message);
+            });
 
-    connection.on("NewGroup",
-        (groupName, token) => {
-            if (groupName == "Error")
-                alert("an Error has occurred");
-            else {
+        connection.on("NewGroup",
+            (groupName, token, imageName) => {
+                if (groupName == "Error")
+                    alert("an Error has occurred");
+                else {
 
-            $(".rooms ul").append(`
+                    $(".rooms #user-groups ul").append(`
             <li data-id='${token}'>
                 ${groupName}
-                <img src='/img/default.jpg' />
+                <img src='/images/groups/${imageName}' />
                 <span></span>
             </li>
     `);
-            $("#exampleModal").modal("toggle");
-            }
-        });
+                    $("#exampleModal").modal("toggle");
+                }
+            });
 
-    connection.start();
+        connection.start();
 
-    function sendPm(event) {
-        console.log("send");
-        event.preventDefault();
+        function sendPm(event) {
+            console.log("send");
+            event.preventDefault();
 
-        var pm = $("#pm").val();
-        connection.invoke("SendMessage", pm);
-    }
-
-    function createChatGroup(event) {
-        event.preventDefault();
-
-        var text = $("#groupName").val();
-        if (text) {
-            connection.invoke("CreateGroup", text);
+            var pm = $("#pm").val();
+            connection.invoke("SendMessage", pm);
         }
-    }
+
+        function createChatGroup(event) {
+            event.preventDefault();
+
+
+            var groupName = event.target[1].value;
+            var imageFile = event.target[2].files[0];
+
+
+            var formData = new FormData();
+
+            formData.append("GroupName", groupName);
+            formData.append("ImageFile", imageFile);
+
+            $.ajax({
+                url: "/Home/CreateGroup",
+                type: "post",
+                data: formData,
+                encyType: "multipart/form-data",
+                processData: false,
+                contentType: false
+            });
+        }
+
+        function search() {
+            var text = $("#search-input").val();
+
+            if (text) {
+                $("#search-result").show();
+                $("#user-groups").hide();
+
+                $.ajax({
+                    url: "/Home/Search?search=" + text,
+                    type: "get"
+                }).done((data) => {
+                    $("#search-result ul").html("");
+                    for (var i in data) {
+                        if (data[i].isUser) {
+                            $("#search-result ul").append(`
+                            <li data-user-id='${data[i].token}'>
+                                    ${data[i].title}
+                                    <img src='/img/${data[i].imageUrl}' />
+                                    <span></span>
+                            </li>
+                    `);
+                        } else {
+                            $("#search-result ul").append(`
+                             <li data--id='${data[i].token}'>
+                                ${data[i].title}
+                                 <img src='/images/groups/${data[i].imageUrl}' />
+                                 <span></span>
+                            </li>
+                    `);
+                        }
+                    }
+                });
+
+            } else {
+                $("#search-result").hide();
+                $("#user-groups").show();
+            }
+        }
 </script>
 }

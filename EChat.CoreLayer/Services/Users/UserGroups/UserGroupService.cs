@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using EChat.CoreLayer.ViewModels.Chats;
@@ -30,8 +31,14 @@ namespace EChat.CoreLayer.Services.Users.UserGroups
             return await result.ToListAsync();
         }
 
-        public async Task JoinGroup(UserGroup model)
+        public async Task JoinGroup(long userId, long groupId)
         {
+            var model = new UserGroup()
+            {
+                CreateDate = DateTime.Now,
+                GroupId = groupId,
+                UserId = userId
+            };
             Insert(model);
             await Save();
         }
