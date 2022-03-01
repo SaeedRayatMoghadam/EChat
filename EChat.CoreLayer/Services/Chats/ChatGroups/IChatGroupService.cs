@@ -10,5 +10,7 @@ namespace EChat.CoreLayer.Services.Chats.ChatGroups
         Task<List<ChatGroup>> GetAll(long userId);
         Task<ChatGroup> Create(CreateGroupViewModel model);
         Task<List<SearchResultViewModel>> Search(string searchText);
+        Task<ChatGroup> Get(long id);
+        Task<ChatGroup> Get(string token);
     }
 }

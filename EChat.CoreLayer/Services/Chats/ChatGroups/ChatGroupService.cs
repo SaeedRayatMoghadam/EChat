@@ -89,5 +89,17 @@ namespace EChat.CoreLayer.Services.Chats.ChatGroups
 
             return result;
         }
+
+        public async Task<ChatGroup> Get(long id)
+        {
+            return await GetById<ChatGroup>(id);
+        }
+
+        public async Task<ChatGroup> Get(string token)
+        {
+            return await Table<ChatGroup>()
+                .Include(g => g.Chats)
+                .FirstOrDefaultAsync(g => g.Token == token);
+        }
     }
 }

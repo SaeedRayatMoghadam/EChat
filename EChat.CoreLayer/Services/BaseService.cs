@@ -151,12 +151,12 @@ namespace EChat.CoreLayer.Services
         }
 
 
-        protected virtual Task<T> GetById<T>(int entityId) where T : BaseEntity
+        protected virtual Task<T> GetById<T>(long entityId) where T : BaseEntity
         {
             return Table<T>().SingleOrDefaultAsync(x => x.Id == entityId);
         }
 
-        protected virtual Task<T> GetById<T>(int entityId, params string[] includs) where T : BaseEntity
+        protected virtual Task<T> GetById<T>(long entityId, params string[] includs) where T : BaseEntity
         {
             IQueryable<T> table = _context.Set<T>();
             foreach (var inc in includs)

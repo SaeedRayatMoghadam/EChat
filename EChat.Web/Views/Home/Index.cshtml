@@ -36,38 +36,38 @@
 
     <div class="col-8 chat-content">
 
-        <div class="header">
+        <div class="header" style="display: none">
             <img src="img/Default.jpg" />
             <h2>Saeed</h2>
         </div>
-        <div class="chats">
+        @*<div class="chats">
             <div class="chat-me">
-                <div class="chat">
-                    <p>Hey ... </p>
-                    <span>2020/06/05</span>
-                </div>
+            <div class="chat">
+            <p>Hey ... </p>
+            <span>2020/06/05</span>
+            </div>
             </div>
             <div class="chat-you">
-                <div class="chat">
-                    <p>Hi , How are you doing ?</p>
-                    <span>2020/06/05</span>
-                </div>
+            <div class="chat">
+            <p>Hi , How are you doing ?</p>
+            <span>2020/06/05</span>
+            </div>
             </div>
             <div class="chat-me">
-                <div class="chat">
-                    <p>I`m Perfect , Whats up ?</p>
-                    <span>2020/06/05</span>
-                </div>
+            <div class="chat">
+            <p>I`m Perfect , Whats up ?</p>
+            <span>2020/06/05</span>
+            </div>
             </div>
             <div class="chat-you">
-                <div class="chat">
-                    <p>Everything is Great !</p>
-                    <span>2020/06/05</span>
-                </div>
+            <div class="chat">
+            <p>Everything is Great !</p>
+            <span>2020/06/05</span>
             </div>
-        </div>
+            </div>
+            </div>*@
 
-        <div class="footer">
+        <div class="footer" style="display: none">
             <form onsubmit="sendPm(event)">
                 <input id="pm" type="text" class="form-control" placeholder="Please Enter your text">
                 <button class="btn btn-success" style="background-color: #007bff">
@@ -107,7 +107,7 @@
 
                     @foreach (var item in Model)
                     {
-                        <li data-id="@item.Token">
+                        <li onclick="joinGroup('@item.Token')">
                             @item.GroupName
                             <img src="/images/groups/@item.ImageUrl" />
                             <span>@item.LastChat?.CreateDate</span>
@@ -126,105 +126,55 @@
 @section Scripts
 {
 <script src="lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+<script src="js/SignalRCustom.js"></script>
 <script>
-        var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
-        connection.on("welcome",
-            function(message) {
-                console.log(message);
-            });
+    var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
+    connection.on("welcome",
+        function(message) {
+            console.log(message);
+        });
 
-        connection.on("SendMessage",
-            (message) => {
-                console.log(message);
-            });
+    connection.on("SendMessage",
+        (message) => {
+            console.log(message);
+        });
 
-        connection.on("NewGroup",
-            (groupName, token, imageName) => {
-                if (groupName == "Error")
-                    alert("an Error has occurred");
-                else {
+    connection.on("NewGroup",
+        (groupName, token, imageName) => {
+            if (groupName == "Error")
+                alert("an Error has occurred");
+            else {
 
-                    $(".rooms #user-groups ul").append(`
-            <li data-id='${token}'>
+                $(".rooms #user-groups ul").append(`
+            <li onclick="joinGroup('${token}')">
                 ${groupName}
                 <img src='/images/groups/${imageName}' />
                 <span></span>
             </li>
     `);
-                    $("#exampleModal").modal("toggle");
-                }
-            });
-
-        connection.start();
-
-        function sendPm(event) {
-            console.log("send");
-            event.preventDefault();
-
-            var pm = $("#pm").val();
-            connection.invoke("SendMessage", pm);
-        }
-
-        function createChatGroup(event) {
-            event.preventDefault();
 
 
-            var groupName = event.target[1].value;
-            var imageFile = event.target[2].files[0];
-
-
-            var formData = new FormData();
-
-            formData.append("GroupName", groupName);
-            formData.append("ImageFile", imageFile);
-
-            $.ajax({
-                url: "/Home/CreateGroup",
-                type: "post",
-                data: formData,
-                encyType: "multipart/form-data",
-                processData: false,
-                contentType: false
-            });
-        }
-
-        function search() {
-            var text = $("#search-input").val();
-
-            if (text) {
-                $("#search-result").show();
-                $("#user-groups").hide();
-
-                $.ajax({
-                    url: "/Home/Search?search=" + text,
-                    type: "get"
-                }).done((data) => {
-                    $("#search-result ul").html("");
-                    for (var i in data) {
-                        if (data[i].isUser) {
-                            $("#search-result ul").append(`
-                            <li data-user-id='${data[i].token}'>
-                                    ${data[i].title}
-                                    <img src='/img/${data[i].imageUrl}' />
-                                    <span></span>
-                            </li>
-                    `);
-                        } else {
-                            $("#search-result ul").append(`
-                             <li data--id='${data[i].token}'>
-                                ${data[i].title}
-                                 <img src='/images/groups/${data[i].imageUrl}' />
-                                 <span></span>
-                            </li>
-                    `);
-                        }
-                    }
-                });
-
-            } else {
-                $("#search-result").hide();
-                $("#user-groups").show();
+                $("#exampleModal").modal({ show: false });
             }
-        }
+        });
+    connection.on("JoinGroup",
+        (group, chats) => {
+            $(".header").css("display", "block");
+            $(".footer").css("display", "block");
+            $(".header h2").html(group.title);
+            $(".header img").attr("src", `/images/groups/${group.imageUrl}`);
+        });
+
+    connection.start();
+
+    $("li[data-id]").click(() => {
+        var token = $(this).Attr("data-id");
+    });
+
+
+    function joinGroup(token) {
+        connection.invoke("JoinGroup", token);
+    }
+
 </script>
 }

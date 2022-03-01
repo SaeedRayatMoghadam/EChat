@@ -42,5 +42,17 @@ namespace EChat.CoreLayer.Services.Users.UserGroups
             Insert(model);
             await Save();
         }
+
+        public async Task<bool> IsUserInGroup(long userId, long groupId)
+        {
+            return await Table<UserGroup>().AnyAsync(g => g.UserId == userId && g.GroupId == groupId);
+        }
+
+        public async Task<bool> IsUserInGroup(long userId, string token)
+        {
+            return await Table<UserGroup>()
+                .Include(g => g.ChatGroup)
+                .AnyAsync(g => g.UserId == userId && g.ChatGroup.Token == token);
+        }
     }
 }

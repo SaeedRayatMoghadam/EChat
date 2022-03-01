@@ -44,11 +44,11 @@ namespace EChat.Web.Controllers
             {
                 model.UserId = User.GetUserId();
                 var result = await _chatGroupService.Create(model);
-                _chatHub.Clients.User(User.GetUserId().ToString()).SendAsync("NewGroup",result.Title, result.Token, result.ImageUrl);
+                await _chatHub.Clients.User(User.GetUserId().ToString()).SendAsync("NewGroup",result.Title, result.Token, result.ImageUrl);
             }
             catch
             {
-                _chatHub.Clients.User(User.GetUserId().ToString()).SendAsync("NewGroup", "ERROR");
+                await _chatHub.Clients.User(User.GetUserId().ToString()).SendAsync("NewGroup", "ERROR");
             }
         }
 
