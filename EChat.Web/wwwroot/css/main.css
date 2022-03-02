@@ -132,6 +132,10 @@
                 font-size: 11px;
             }
 
+.chats:last-child {
+    margin-bottom: 20px;
+}
+
 .chat {
     direction: ltr !important;
 }

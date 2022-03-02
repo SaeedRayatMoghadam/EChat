@@ -97,8 +97,7 @@ namespace EChat.CoreLayer.Services.Chats.ChatGroups
 
         public async Task<ChatGroup> Get(string token)
         {
-            return await Table<ChatGroup>()
-                .Include(g => g.Chats)
+            return await Table<ChatGroup>()  
                 .FirstOrDefaultAsync(g => g.Token == token);
         }
     }

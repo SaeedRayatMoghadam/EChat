@@ -1,10 +1,10 @@
-﻿function sendPm(event) {
-    console.log("send");
-    event.preventDefault();
+﻿////function sendPm(event) {
+////    console.log("send");
+////    event.preventDefault();
 
-    var pm = $("#pm").val();
-    connection.invoke("SendMessage", pm);
-}
+////    var pm = $("#pm").val();
+////    connection.invoke("SendMessage", pm);
+////}
 
 function createChatGroup(event) {
     event.preventDefault();

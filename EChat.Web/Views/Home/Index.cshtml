@@ -38,39 +38,39 @@
 
         <div class="header" style="display: none">
             <img src="img/Default.jpg" />
-            <h2>Saeed</h2>
+            <h2>Chat</h2>
         </div>
-        @*<div class="chats">
-            <div class="chat-me">
-            <div class="chat">
-            <p>Hey ... </p>
-            <span>2020/06/05</span>
-            </div>
-            </div>
-            <div class="chat-you">
-            <div class="chat">
-            <p>Hi , How are you doing ?</p>
-            <span>2020/06/05</span>
-            </div>
-            </div>
-            <div class="chat-me">
-            <div class="chat">
-            <p>I`m Perfect , Whats up ?</p>
-            <span>2020/06/05</span>
-            </div>
-            </div>
-            <div class="chat-you">
-            <div class="chat">
-            <p>Everything is Great !</p>
-            <span>2020/06/05</span>
-            </div>
-            </div>
-            </div>*@
+        <div class="chats">
+            @*<div class="chat-me">
+                <div class="chat">
+                <p>Hey ... </p>
+                <span>2020/06/05</span>
+                </div>
+                </div>
+                <div class="chat-you">
+                <div class="chat">
+                <p>Hi , How are you doing ?</p>
+                <span>2020/06/05</span>
+                </div>
+                </div>
+                <div class="chat-me">
+                <div class="chat">
+                <p>I`m Perfect , Whats up ?</p>
+                <span>2020/06/05</span>
+                </div>
+                </div>
+                <div class="chat-you">
+                <div class="chat">
+                <p>Everything is Great !</p>
+                <span>2020/06/05</span>
+                </div>
+                </div>*@
+        </div>
 
-        <div class="footer" style="display: none">
+        <div class="footer mt-2" style="display: none">
             <form onsubmit="sendPm(event)">
                 <input id="pm" type="text" class="form-control" placeholder="Please Enter your text">
-                <button class="btn btn-success" style="background-color: #007bff">
+                <button type="submit" class="btn btn-success" style="background-color: #007bff">
                     Send
                     <i class="fa fa-send"></i>
                 </button>
@@ -128,24 +128,61 @@
 <script src="lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
 <script src="js/SignalRCustom.js"></script>
 <script>
-    var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
-    connection.on("welcome",
-        function(message) {
-            console.log(message);
-        });
+        var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
 
-    connection.on("SendMessage",
-        (message) => {
-            console.log(message);
-        });
+        var currentGroupId = 0;
+        var userId = 0;
 
-    connection.on("NewGroup",
-        (groupName, token, imageName) => {
-            if (groupName == "Error")
-                alert("an Error has occurred");
-            else {
+        connection.on("welcome",
+            function(id) {
+                userId = id;
+            });
 
-                $(".rooms #user-groups ul").append(`
+        connection.on("JoinGroup",
+            (group, chats) => {
+                $(".header").css("display", "block");
+                $(".footer").css("display", "block");
+                $(".header img").attr("src", `/images/groups/${group.imageUrl}`);
+                $(".header h2").html(group.title);
+
+                currentGroupId = group.id;
+
+                $(".chats").html("");
+
+                for (var i in chats) {
+                    var chat = chats[i];
+                    if (userId == chat.userId) {
+                        $(".chats").append(`
+        <div class="chat-me">
+            <div class="chat">
+                <p>${chat.body}</p>
+                <span>${chat.createDate}</span>
+            </div>
+        </div>
+        `);
+                    } else {
+                        $(".chats").append(`
+        <div class="chat-you">
+            <div class="chat">
+                <p>${chat.body}</p>
+                <span>${chat.createDate}</span>
+            </div>
+        </div>
+        `);
+                    }
+
+                }
+            });
+
+        connection.on("SendMessage", receive);
+
+        connection.on("NewGroup",
+            (groupName, token, imageName) => {
+                if (groupName == "Error")
+                    alert("an Error has occurred");
+                else {
+
+                    $(".rooms #user-groups ul").append(`
             <li onclick="joinGroup('${token}')">
                 ${groupName}
                 <img src='/images/groups/${imageName}' />
@@ -154,27 +191,53 @@
     `);
 
 
-                $("#exampleModal").modal({ show: false });
+                    $("#exampleModal").modal({ show: false });
+                }
+            });
+
+        connection.start();
+
+        function joinGroup(token) {
+            connection.invoke("JoinGroup", token, currentGroupId);
+        }
+        $("li[data-id]").click(() => {
+            var token = $(this).Attr("data-id");
+        });
+
+
+
+        function sendPm(event) {
+            event.preventDefault();
+
+            var pm = $("#pm").val();
+            if (pm)
+                connection.invoke("SendMessage", pm, currentGroupId);
+            else alert("Enter Your Message");
+        }
+
+        function receive(chat) {
+            $("#pm").val("");
+
+            if (userId == chat.userId) {
+                $(".chats").append(`
+        <div class="chat-me">
+            <div class="chat">
+                <p>${chat.body}</p>
+                <span>${chat.createDate}</span>
+            </div>
+        </div>
+        `);
+            } else {
+                $(".chats").append(`
+        <div class="chat-you">
+            <div class="chat">
+                <p>${chat.body}</p>
+                <span>${chat.createDate}</span>
+            </div>
+        </div>
+        `);
             }
-        });
-    connection.on("JoinGroup",
-        (group, chats) => {
-            $(".header").css("display", "block");
-            $(".footer").css("display", "block");
-            $(".header h2").html(group.title);
-            $(".header img").attr("src", `/images/groups/${group.imageUrl}`);
-        });
-
-    connection.start();
-
-    $("li[data-id]").click(() => {
-        var token = $(this).Attr("data-id");
-    });
-
-
-    function joinGroup(token) {
-        connection.invoke("JoinGroup", token);
-    }
+        }
 
 </script>
 }

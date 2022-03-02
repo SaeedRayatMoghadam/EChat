@@ -4,6 +4,7 @@ namespace EChat.Web.Hubs.Interfaces
 {
     public interface IChatHub
     {
-        Task JoinGroup(string token);
+        Task JoinGroup(string token, long currentGroupId);
+        Task SendMessage(string text, long groupId);
     }
 }
