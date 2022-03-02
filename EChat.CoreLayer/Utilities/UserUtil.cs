@@ -10,5 +10,12 @@ namespace EChat.CoreLayer.Utilities
             var userId = claims.FindFirst(ClaimTypes.NameIdentifier).Value;
             return Convert.ToInt64(userId);
         }
+
+        public static string GetUserName(this ClaimsPrincipal? claims)
+        {
+            
+            return claims.FindFirst(ClaimTypes.Name).Value;
+            
+        }
     }
 }

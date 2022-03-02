@@ -41,30 +41,7 @@
             <h2>Chat</h2>
         </div>
         <div class="chats">
-            @*<div class="chat-me">
-                <div class="chat">
-                <p>Hey ... </p>
-                <span>2020/06/05</span>
-                </div>
-                </div>
-                <div class="chat-you">
-                <div class="chat">
-                <p>Hi , How are you doing ?</p>
-                <span>2020/06/05</span>
-                </div>
-                </div>
-                <div class="chat-me">
-                <div class="chat">
-                <p>I`m Perfect , Whats up ?</p>
-                <span>2020/06/05</span>
-                </div>
-                </div>
-                <div class="chat-you">
-                <div class="chat">
-                <p>Everything is Great !</p>
-                <span>2020/06/05</span>
-                </div>
-                </div>*@
+
         </div>
 
         <div class="footer mt-2" style="display: none">
@@ -125,9 +102,14 @@
 
 @section Scripts
 {
-<script src="lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
-<script src="js/SignalRCustom.js"></script>
-<script>
+    <script src="lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+    <script src="js/SignalRCustom.js"></script>
+    <script>
+        $(document).ready(() => {
+            if (Notification.permission !== "granted") {
+                Notification.requestPermission();
+            }
+        });
         var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
 
         var currentGroupId = 0;
@@ -155,6 +137,7 @@
                         $(".chats").append(`
         <div class="chat-me">
             <div class="chat">
+            <span class="pb-2">${chat.userName}</span>
                 <p>${chat.body}</p>
                 <span>${chat.createDate}</span>
             </div>
@@ -164,6 +147,7 @@
                         $(".chats").append(`
         <div class="chat-you">
             <div class="chat">
+                <span class="pb-2">${chat.userName}</span>
                 <p>${chat.body}</p>
                 <span>${chat.createDate}</span>
             </div>
@@ -195,15 +179,27 @@
                 }
             });
 
+        connection.on("SendNotification",
+            (chat) => {
+                if (Notification.permission === "granted") {
+                    if (currentGroupId !== chat.groupId) {
+                        var notif = new Notification(chat.groupName,
+                            {
+                                body:chat.body,
+                            });
+                    }
+                }
+            });
+
         connection.start();
 
         function joinGroup(token) {
             connection.invoke("JoinGroup", token, currentGroupId);
         }
+
         $("li[data-id]").click(() => {
             var token = $(this).Attr("data-id");
         });
-
 
 
         function sendPm(event) {
@@ -216,12 +212,15 @@
         }
 
         function receive(chat) {
+            
+            
             $("#pm").val("");
 
             if (userId == chat.userId) {
                 $(".chats").append(`
         <div class="chat-me">
             <div class="chat">
+                <span class="pb-2">${chat.userName}</span>
                 <p>${chat.body}</p>
                 <span>${chat.createDate}</span>
             </div>
@@ -231,6 +230,7 @@
                 $(".chats").append(`
         <div class="chat-you">
             <div class="chat">
+                <span class="pb-2">${chat.userName}</span>
                 <p>${chat.body}</p>
                 <span>${chat.createDate}</span>
             </div>
@@ -239,5 +239,5 @@
             }
         }
 
-</script>
+    </script>
 }

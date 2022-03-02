@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using EChat.CoreLayer.Services.Chats;
 using EChat.CoreLayer.Services.Chats.ChatGroups;
+using EChat.CoreLayer.Services.Users;
 using EChat.CoreLayer.Services.Users.UserGroups;
 using EChat.CoreLayer.Utilities;
 using EChat.CoreLayer.ViewModels.Chats;
@@ -17,12 +19,14 @@ namespace EChat.Web.Hubs
         private readonly IChatGroupService _chatGroupService;
         private readonly IUserGroupService _userGroupService;
         private readonly IChatService _chatService;
+        private readonly IUserService _userService;
 
-        public ChatHub(IChatGroupService chatGroupService, IUserGroupService userGroupService, IChatService chatService)
+        public ChatHub(IChatGroupService chatGroupService, IUserGroupService userGroupService, IChatService chatService, IUserService userService)
         {
             _chatGroupService = chatGroupService;
             _userGroupService = userGroupService;
             _chatService = chatService;
+            _userService = userService;
         }
 
         public override Task OnConnectedAsync()
@@ -67,6 +71,10 @@ namespace EChat.Web.Hubs
 
         public async Task SendMessage(string text, long groupId)
         {
+            var group = await _chatGroupService.Get(groupId);
+            if(group == null)
+                return;
+
             var chat = new Chat()
             {
                 Body = text,
@@ -77,7 +85,22 @@ namespace EChat.Web.Hubs
 
             await _chatService.SendMessage(chat);
             chat.CreateDate = DateTime.Now.Date;
-            await Clients.Groups(groupId.ToString()).SendAsync("SendMessage", chat);
+
+            var chatModel = new ChatViewModel()
+            {
+                Body = text,
+                UserName = Context.User.GetUserName(),
+                CreateDate = $"{chat.CreateDate.Hour} : {chat.CreateDate.Minute}",
+                UserId = Context.User.GetUserId(),
+                GroupName = group.Title,
+                GroupId = groupId
+            };
+
+            var userIDs = await _userService.GetUsersIDs(groupId);
+
+            await Clients.Users(userIDs).SendAsync("SendNotification", chatModel);
+
+            await Clients.Groups(groupId.ToString()).SendAsync("SendMessage", chatModel);
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using EChat.CoreLayer.Utilities.Security;
 using EChat.CoreLayer.ViewModels;
@@ -60,6 +62,14 @@ namespace EChat.CoreLayer.Services.Users
                 return null;
 
             return user;
+        }
+
+        public async Task<List<string>> GetUsersIDs(long groupId)
+        {
+            return await Table<UserGroup>()
+                .Where(ug => ug.GroupId == groupId)
+                .Select(u => u.UserId.ToString())
+                .ToListAsync();
         }
     }
 }
