@@ -19,10 +19,17 @@ namespace EChat.DataLayer.Entities.Chats
 
         public long OwnerId { get; set; }
 
+        public long? ReceiverId { get; set; }
+        public bool IsPrivate { get; set; }
+
+
         #region Relations
 
         [ForeignKey("OwnerId")]
         public User User { get; set; }
+
+        [ForeignKey("ReceiverId")]
+        public User Receiver { get; set; }
 
         public ICollection<Chat> Chats { get; set; }
         public ICollection<UserGroup> UserGroups { get; set; }

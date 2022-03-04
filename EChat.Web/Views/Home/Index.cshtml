@@ -1,9 +1,16 @@
-﻿@model List<EChat.CoreLayer.ViewModels.Chats.UserGroupViewModel>
+﻿@using EChat.CoreLayer.Utilities
+@model List<EChat.CoreLayer.ViewModels.Chats.UserGroupViewModel>
 @{
     ViewData["Title"] = "Home Page";
 }
 
 
+<div class="disconnect">
+    <div>
+        <p>Connection Lost.</p>
+        <p>Reconnecting ...</p>
+    </div>
+</div>
 
 <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -41,7 +48,6 @@
             <h2>Chat</h2>
         </div>
         <div class="chats">
-
         </div>
 
         <div class="footer mt-2" style="display: none">
@@ -87,7 +93,7 @@
                         <li onclick="joinGroup('@item.Token')">
                             @item.GroupName
                             <img src="/images/groups/@item.ImageUrl" />
-                            <span>@item.LastChat?.CreateDate</span>
+                            <span>@item.LastChat?.CreateDate.ToShamsi("ds dd ms Y")</span>
                         </li>
                     }
                 </ul>
@@ -102,142 +108,12 @@
 
 @section Scripts
 {
-    <script src="lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
-    <script src="js/SignalRCustom.js"></script>
-    <script>
-        $(document).ready(() => {
-            if (Notification.permission !== "granted") {
-                Notification.requestPermission();
-            }
-        });
-        var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
-
-        var currentGroupId = 0;
-        var userId = 0;
-
-        connection.on("welcome",
-            function(id) {
-                userId = id;
-            });
-
-        connection.on("JoinGroup",
-            (group, chats) => {
-                $(".header").css("display", "block");
-                $(".footer").css("display", "block");
-                $(".header img").attr("src", `/images/groups/${group.imageUrl}`);
-                $(".header h2").html(group.title);
-
-                currentGroupId = group.id;
-
-                $(".chats").html("");
-
-                for (var i in chats) {
-                    var chat = chats[i];
-                    if (userId == chat.userId) {
-                        $(".chats").append(`
-        <div class="chat-me">
-            <div class="chat">
-            <span class="pb-2">${chat.userName}</span>
-                <p>${chat.body}</p>
-                <span>${chat.createDate}</span>
-            </div>
-        </div>
-        `);
-                    } else {
-                        $(".chats").append(`
-        <div class="chat-you">
-            <div class="chat">
-                <span class="pb-2">${chat.userName}</span>
-                <p>${chat.body}</p>
-                <span>${chat.createDate}</span>
-            </div>
-        </div>
-        `);
-                    }
-
-                }
-            });
-
-        connection.on("SendMessage", receive);
-
-        connection.on("NewGroup",
-            (groupName, token, imageName) => {
-                if (groupName == "Error")
-                    alert("an Error has occurred");
-                else {
-
-                    $(".rooms #user-groups ul").append(`
-            <li onclick="joinGroup('${token}')">
-                ${groupName}
-                <img src='/images/groups/${imageName}' />
-                <span></span>
-            </li>
-    `);
+<script src="lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+<script src="js/SignalRCustom.js"></script>
+<script>
 
 
-                    $("#exampleModal").modal({ show: false });
-                }
-            });
-
-        connection.on("SendNotification",
-            (chat) => {
-                if (Notification.permission === "granted") {
-                    if (currentGroupId !== chat.groupId) {
-                        var notif = new Notification(chat.groupName,
-                            {
-                                body:chat.body,
-                            });
-                    }
-                }
-            });
-
-        connection.start();
-
-        function joinGroup(token) {
-            connection.invoke("JoinGroup", token, currentGroupId);
-        }
-
-        $("li[data-id]").click(() => {
-            var token = $(this).Attr("data-id");
-        });
 
 
-        function sendPm(event) {
-            event.preventDefault();
-
-            var pm = $("#pm").val();
-            if (pm)
-                connection.invoke("SendMessage", pm, currentGroupId);
-            else alert("Enter Your Message");
-        }
-
-        function receive(chat) {
-            
-            
-            $("#pm").val("");
-
-            if (userId == chat.userId) {
-                $(".chats").append(`
-        <div class="chat-me">
-            <div class="chat">
-                <span class="pb-2">${chat.userName}</span>
-                <p>${chat.body}</p>
-                <span>${chat.createDate}</span>
-            </div>
-        </div>
-        `);
-            } else {
-                $(".chats").append(`
-        <div class="chat-you">
-            <div class="chat">
-                <span class="pb-2">${chat.userName}</span>
-                <p>${chat.body}</p>
-                <span>${chat.createDate}</span>
-            </div>
-        </div>
-        `);
-            }
-        }
-
-    </script>
+</script>
 }

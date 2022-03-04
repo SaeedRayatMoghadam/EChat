@@ -50,29 +50,29 @@ namespace EChat.Web.Hubs
         public async Task JoinGroup(string token, long currentGroupId)
         {
             var group = await _chatGroupService.Get(token);
+            var groupDto = FixGroupModel(group);
             if (group == null)
-                await Clients.Caller.SendAsync("Error", "Group NOT Found");
+                await Clients.Caller.SendAsync("Error", "Group Not Found");
             else
             {
                 var chats = await _chatService.GetAll(group.Id);
                 if (!await _userGroupService.IsUserInGroup(Context.User.GetUserId(), token))
                 {
                     await _userGroupService.JoinGroup(Context.User.GetUserId(), group.Id);
-                    await Clients.Caller.SendAsync("NewGroup", group.Title,group.Token,group.ImageUrl);
+                    await Clients.Caller.SendAsync("NewGroup", groupDto.Title, groupDto.Token, groupDto.ImageUrl);
                 }
+                if (currentGroupId > 0)
+                    await Groups.RemoveFromGroupAsync(Context.ConnectionId, currentGroupId.ToString());
 
-                if(currentGroupId > 0)
-                    await Groups.RemoveFromGroupAsync(Context.ConnectionId,currentGroupId.ToString());
-            
                 await Groups.AddToGroupAsync(Context.ConnectionId, group.Id.ToString());
-                await Clients.Caller.SendAsync("JoinGroup", group, chats);
+                await Clients.Caller.SendAsync("JoinGroup", groupDto, chats);
             }
         }
 
         public async Task SendMessage(string text, long groupId)
         {
             var group = await _chatGroupService.Get(groupId);
-            if(group == null)
+            if (group == null)
                 return;
 
             var chat = new Chat()
@@ -90,7 +90,7 @@ namespace EChat.Web.Hubs
             {
                 Body = text,
                 UserName = Context.User.GetUserName(),
-                CreateDate = $"{chat.CreateDate.Hour} : {chat.CreateDate.Minute}",
+                CreateDate = $"{chat.CreateDate.Hour}:{chat.CreateDate.Minute}",
                 UserId = Context.User.GetUserId(),
                 GroupName = group.Title,
                 GroupId = groupId
@@ -102,5 +102,81 @@ namespace EChat.Web.Hubs
 
             await Clients.Groups(groupId.ToString()).SendAsync("SendMessage", chatModel);
         }
+
+        public async Task JoinPrivateGroup(long receiverId, long currentGroupId)
+        {
+            if (currentGroupId > 0)
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, currentGroupId.ToString());
+
+            var group = await _chatGroupService.CreatePrivateGroup(Context.User.GetUserId(), receiverId);
+            var groupDto = FixGroupModel(group);
+
+            if (!await _userGroupService.IsUserInGroup(Context.User.GetUserId(), group.Token))
+            {
+                await _userGroupService.JoinGroup(new List<long>()
+                    { groupDto.ReceiverId ?? 0, group.OwnerId }, group.Id);
+
+                await Clients.Caller.SendAsync("NewGroup", groupDto.Title, groupDto.Token, groupDto.ImageUrl);
+                await Clients.User(groupDto.ReceiverId.ToString()).SendAsync("NewGroup", Context.User.GetUserName(), groupDto.Token, groupDto.ImageUrl);
+            }
+
+            await Groups.AddToGroupAsync(Context.ConnectionId, group.Id.ToString());
+
+
+            var chats = await _chatService.GetAll(group.Id);
+
+
+            await Clients.Caller.SendAsync("JoinGroup", groupDto, chats);
+        }
+
+        #region Utils
+
+        private ChatGroup FixGroupModel(ChatGroup model)
+        {
+            if (model.IsPrivate)
+            {
+                if (model.OwnerId == Context.User.GetUserId())
+                {
+                    return new ChatGroup()
+                    {
+                        Id = model.Id,
+                        Title = model.Receiver.UserName,
+                        Token = model.Token,
+                        CreateDate = model.CreateDate,
+                        ImageUrl = model.Receiver.Avatar,
+                        IsPrivate = false,
+                        OwnerId = model.OwnerId,
+                        ReceiverId = model.ReceiverId,
+
+                    };
+                }
+                return new ChatGroup()
+                {
+                    Id = model.Id,
+                    Title = model.User.UserName,
+                    Token = model.Token,
+                    CreateDate = model.CreateDate,
+                    ImageUrl = model.User.Avatar,
+                    IsPrivate = false,
+                    OwnerId = model.OwnerId,
+                    ReceiverId = model.ReceiverId,
+
+                };
+            }
+
+            return new ChatGroup()
+            {
+                Id = model.Id,
+                Token = model.Token,
+                Title = model.Title,
+                CreateDate = model.CreateDate,
+                ImageUrl = model.ImageUrl,
+                IsPrivate = false,
+                OwnerId = model.OwnerId,
+                ReceiverId = model.ReceiverId,
+            };
+        }
+
+        #endregion
     }
 }

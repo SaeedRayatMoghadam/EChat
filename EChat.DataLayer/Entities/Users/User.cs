@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using EChat.DataLayer.Entities.Chats;
 
 namespace EChat.DataLayer.Entities.Users
@@ -19,7 +20,11 @@ namespace EChat.DataLayer.Entities.Users
 
         #region Relations
 
+        [InverseProperty("User")]
         public ICollection<ChatGroup> ChatGroups { get; set; }
+
+        [InverseProperty("Receiver")]
+        public ICollection<ChatGroup> PrivateGroups { get; set; }
         public ICollection<Chat> Chats { get; set; }
         public ICollection<UserRole> UserRoles { get; set; }
         public ICollection<UserGroup> UserGroups { get; set; }

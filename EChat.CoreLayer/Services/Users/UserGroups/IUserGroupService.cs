@@ -9,6 +9,7 @@ namespace EChat.CoreLayer.Services.Users.UserGroups
     {
         Task<List<UserGroupViewModel>> GetAll(long userId);
         Task JoinGroup(long userId, long groupId);
+        Task JoinGroup(List<long> userIDs, long groupId);
         Task<bool> IsUserInGroup(long userId, long groupId);
         Task<bool> IsUserInGroup(long userId, string token);
     }

@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EChat.CoreLayer.Services.Chats.ChatGroups
 {
-    public class ChatGroupService : BaseService,IChatGroupService
+    public class ChatGroupService : BaseService, IChatGroupService
     {
         private readonly IUserGroupService _userGroupService;
         public ChatGroupService(EChatContext context, IUserGroupService userGroupService) : base(context)
@@ -34,7 +34,7 @@ namespace EChat.CoreLayer.Services.Chats.ChatGroups
         {
             if (model.ImageFile == null || !FileValidation.IsValidImageFile(model.ImageFile.FileName))
                 throw new Exception();
-            
+
 
             var imageName = await model.ImageFile.SaveFile("wwwroot/images/groups");
 
@@ -57,48 +57,78 @@ namespace EChat.CoreLayer.Services.Chats.ChatGroups
             return chatGroup;
         }
 
-        public async Task<List<SearchResultViewModel>> Search(string searchText)
+        public async Task<List<SearchResultViewModel>> Search(string searchText, long userId)
         {
             var result = new List<SearchResultViewModel>();
-
-            if (string.IsNullOrEmpty(searchText))
+            if (string.IsNullOrWhiteSpace(searchText))
                 return result;
 
             var groups = await Table<ChatGroup>()
-                .Where(g => g.Title.Contains(searchText))
-                .Select(g => new SearchResultViewModel()
+                .Where(g => g.Title.Contains(searchText) && !g.IsPrivate)
+                .Select(s => new SearchResultViewModel()
                 {
-                    ImageUrl = g.ImageUrl,
-                    Token = g.Token,
+                    ImageUrl = s.ImageUrl,
+                    Token = s.Token,
                     IsUser = false,
-                    Title = g.Title
+                    Title = s.Title
                 }).ToListAsync();
 
             var users = await Table<User>()
-                .Where(u => u.UserName.Contains(searchText))
-                .Select(u => new SearchResultViewModel()
+                .Where(g => g.UserName.Contains(searchText) && g.Id != userId)
+                .Select(s => new SearchResultViewModel()
                 {
-                    ImageUrl = u.Avatar,
-                    Token = u.Id.ToString(),
+                    ImageUrl = s.Avatar,
+                    Token = s.Id.ToString(),
                     IsUser = true,
-                    Title = u.UserName
+                    Title = s.UserName
                 }).ToListAsync();
-
             result.AddRange(groups);
             result.AddRange(users);
-
             return result;
         }
 
         public async Task<ChatGroup> Get(long id)
         {
-            return await GetById<ChatGroup>(id);
+            return await Table<ChatGroup>()
+                .Include(g => g.User)
+                .Include(g => g.Receiver)
+                .FirstOrDefaultAsync(g => g.Id == id);
         }
 
         public async Task<ChatGroup> Get(string token)
         {
-            return await Table<ChatGroup>()  
+            return await Table<ChatGroup>()
+                .Include(g => g.User)
+                .Include(g => g.Receiver)
                 .FirstOrDefaultAsync(g => g.Token == token);
+        }
+
+        public async Task<ChatGroup> CreatePrivateGroup(long userId, long receiverId)
+        {
+            var group = await Table<ChatGroup>()
+                .Include(c => c.User)
+                .Include(c => c.Receiver)
+                .SingleOrDefaultAsync(s =>
+                    (s.OwnerId == userId && s.ReceiverId == receiverId)
+                    || (s.OwnerId == receiverId && s.ReceiverId == userId));
+
+            if (group == null)
+            {
+                var groupCreated = new ChatGroup()
+                {
+                    CreateDate = DateTime.Now,
+                    Title = $"Chat With {receiverId}",
+                    Token = Guid.NewGuid().ToString(),
+                    ImageUrl = "Default.jpg",
+                    IsPrivate = true,
+                    OwnerId = userId,
+                    ReceiverId = receiverId
+                };
+                Insert(groupCreated);
+                await Save();
+                return await Get(groupCreated.Id);
+            }
+            return group;
         }
     }
 }

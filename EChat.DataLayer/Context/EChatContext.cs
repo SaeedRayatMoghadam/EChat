@@ -47,6 +47,7 @@ namespace EChat.DataLayer.Context
                 .WithMany(c => c.UserGroups)
                 .HasForeignKey(c => c.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
+            
 
             base.OnModelCreating(modelBuilder);
         }

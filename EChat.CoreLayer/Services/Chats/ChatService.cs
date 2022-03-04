@@ -28,7 +28,7 @@ namespace EChat.CoreLayer.Services.Chats
                 .Select(c => new ChatViewModel()
                 {
                     UserName = c.User.UserName,
-                    CreateDate = $"{c.CreateDate.Hour} : {c.CreateDate.Minute}",
+                    CreateDate = $"{c.CreateDate.Hour}:{c.CreateDate.Minute}",
                     Body = c.Body,
                     GroupName = c.ChatGroup.Title,
                     GroupId = c.GroupId,

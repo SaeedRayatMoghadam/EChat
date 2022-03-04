@@ -19,7 +19,7 @@ namespace EChat.Web.Controllers
     public class HomeController : Controller
     {
         private readonly IChatGroupService _chatGroupService;
-        private IHubContext<ChatHub> _chatHub;
+        private readonly IHubContext<ChatHub> _chatHub;
         private readonly IUserGroupService _userGroupService;
 
         public HomeController(IChatGroupService chatGroupService, IHubContext<ChatHub> chatHub, IUserGroupService userGroupService)
@@ -52,9 +52,10 @@ namespace EChat.Web.Controllers
             }
         }
 
+        [Authorize]
         public async Task<IActionResult> Search(string search)
         {
-            return new ObjectResult(await _chatGroupService.Search(search));
+            return new ObjectResult(await _chatGroupService.Search(search, User.GetUserId()));
         }
     }
 }
